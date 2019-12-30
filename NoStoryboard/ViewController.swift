@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController {
 
     let maxHeaderHeight: CGFloat = 300
-    let minHeaderHeight: CGFloat = 40
+    let minHeaderHeight: CGFloat = 44
 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var tableView: UITableView!
@@ -28,9 +28,25 @@ class ViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.contentInset = UIEdgeInsets(top: maxHeaderHeight, left: 0, bottom: 0, right: 0)
-        //tableView.scrollIndicatorInsets = tableView.contentInset
+
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+
+        tableView.insetsLayoutMarginsFromSafeArea = false
+        tableView.contentInsetAdjustmentBehavior = .never;
+        tableView.insetsContentViewsToSafeArea = false
+
+        tableView.contentInset = UIEdgeInsets(top: maxHeaderHeight, left: 0, bottom: 0, right: 0)
+        tableView.contentOffset.y = -maxHeaderHeight
+        
+        updateHeaderHeight()
+    }
+    
+    func updateHeaderHeight() {
+        let headerHeight = max(-tableView.contentOffset.y, minHeaderHeight)
+        headerViewHeight.constant = headerHeight
+        
+        imageView.alpha = (headerHeight - minHeaderHeight) / (maxHeaderHeight - minHeaderHeight)
+        print("contentOffset.y: \(tableView.contentOffset.y), headerViewHeight.constant: \(headerViewHeight.constant)")
     }
 }
 
@@ -38,11 +54,7 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(scrollView.contentOffset.y)
-        let y = -scrollView.contentOffset.y
-        let headerHeight = max(y, minHeaderHeight)
-        headerViewHeight.constant = headerHeight
-        //tableView.scrollIndicatorInsets.top = headerHeight
+        updateHeaderHeight()
     }
 }
 
